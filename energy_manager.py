@@ -16,7 +16,7 @@ class CleanEnergyProducer:
     def __init__(self, clean_name, yield_power):
         self.name = clean_name
         self.yield_power = yield_power
-    
+
     def yield_power():
         yield_power = df["pv_yield_power"]
 
@@ -25,40 +25,54 @@ class Consumer:
     def __init__(self, consumer_name, demand):
         self.name = consumer_name
         self.demand = demand
-        
+
     def demand():
         demand = df["household_consumption"]
-        
 
 
 class Storage:
     def __init__(self, storage_name, capacity):
         self.name = storage_name
         self.capacity = capacity
-        
+
+
 class LegacyEnergyProducer:
     def __init__(self, legacy_name, yield_power):
         self.name = legacy_name
         self.yield_power = yield_power
 
+
+# ------ This class is not properly working yet. -----------
 class ConfiguredSystem():
     # def __init__(self, clean_energy_producers, consumer, storage):
-        
+
+    # Current implementation is loading dummy dataset at once and provide decision for time stamps which is already provided.
+    # Future plan: Deploy on AWS lambda and set schedule ot run it every 5 min so that the decison is up to date.
+
     def decide_component():
-        
-        # When the supply of clean energy is larger than demand, always use clean energy.
-        if CleanEnergyProducer.yield_power > Consumer.demand:
-            chosen_component = CleanEnergyProducer
-            
-        # When there is still power left in storage, use storage. It always keeps a little amount in case for emergency.
-        elif storage.power > 5000.0:
-            chosen_component = Storage
-        
-        else:
-            chosen_component = LegacyEnergyProducer
-        
-        return chosen_component
-    pass
+
+        for ind in df.index:
+
+            # print(df['timestamp'][ind])
+
+            # When the supply of clean energy is larger than demand, always use clean energy.
+            if df["pv_yield_power"][ind] > df["household_consumption"][ind]:
+
+                df["log"][ind] = "clean energy"
+                chosen_component = CleanEnergyProducer
+
+            # When there is still power left in storage, use storage. It always keeps a little amount in case for emergency.
+            elif df["battery_power"][ind] > 5000.0:
+
+                df["log"][ind] = "battery"
+                chosen_component = Storage
+
+            else:
+                df["log"][ind] = "grid"
+                chosen_component = LegacyEnergyProducer
+
+            return chosen_component
+
 
 # Create CleanEnergyProducer instances
 solar_power = CleanEnergyProducer("Solar power", 1000)
@@ -78,17 +92,21 @@ hydrogen_tank = Storage("Hydrogen tank", 5000)
 grid = LegacyEnergyProducer("grid", 800)
 
 # Example of a configured system
-example_system = ConfiguredSystem(solar_power, house_hold, battery, grid)
+# I commented this out because it is not working yet.
+# example_system = ConfiguredSystem(solar_power, house_hold, battery, grid)
 
-
+# Options of components
 clean_energy_producers = [solar_power, wind_power, geothermal_power]
 consumers = [house_hold, office, factory]
 storage = [battery, hydrogen_tank]
 
+# load dummy dataset
+df = pd.read_csv("profiles_dataset_updated.csv")
+
 
 def choose_component(clean_energy_producers, consumers, storages):
     """
-        Let an user to choose a combination of components from the options provided.
+        Let a user choose a combination of components from the options provided.
 
 
     Parameters
@@ -101,7 +119,7 @@ def choose_component(clean_energy_producers, consumers, storages):
 
     Returns
     -------
-    None.
+    clean_energy_input, consumer_input, storage_input
 
     """
 
@@ -111,13 +129,11 @@ def choose_component(clean_energy_producers, consumers, storages):
 
     for index, item in enumerate(clean_energy_producers):
         input_message += f'{index+1}) {item.name}\n'
-        
+
     input_message += f"Your choice for the clean energy producer:"
 
     while clean_energy_input not in map(str, range(1, len(clean_energy_producers) + 1)):
         clean_energy_input = input(input_message)
-
-    # print('You picked: ' + option_list[int(user_input) - 1])
 
     # Choose consumer component
     consumer_input = ""
@@ -142,53 +158,17 @@ def choose_component(clean_energy_producers, consumers, storages):
 
     while storage_input not in map(str, range(1, len(storages) + 1)):
         storage_input = input(input_message)
-        
+
     print(
         f"Your energy components are: {clean_energy_producers[int(clean_energy_input) - 1].name}, {consumers[int(consumer_input) - 1].name}, {storages[int(storage_input) - 1].name}")
 
     return clean_energy_input, consumer_input, storage_input
 
 
-# load dummy dataset
-df = pd.read_csv("profiles_dataset_updated.csv")
-
-# Current implementation is loading dummy dataset at once and provide decision for time stamps which is already provided.
-# Future plan: Deploy on AWS lambda and set schedule ot run it every 5 min so that the decison is up to date.
-
-def decide_component():
-    
-    for ind in df.index:
-        
-        print(df['timestamp'][ind])
-        
-        
-        # When the supply of clean energy is larger than demand, always use clean energy.
-        if df["pv_yield_power"][ind] > df["household_consumption"][ind]:
-            
-            df["log"][ind] = "clean energy"
-            chosen_component = CleanEnergyProducer
-                     
-            
-        # When there is still power left in storage, use storage. It always keeps a little amount in case for emergency.
-        elif df["battery_power"][ind] > 5000.0:
-            
-            df["log"][ind] = "battery"
-            chosen_component = Storage
-        
-        else:
-            df["log"][ind] = "grid"
-            chosen_component = LegacyEnergyProducer
-        
-        return chosen_component
-
-
-
-
 def main():
     print("I'm an energy manager!\n Choose a component of clean energy producers, consumers, storages.")
 
     choose_component(clean_energy_producers, consumers, storage)
-
 
 
 if __name__ == "__main__":
