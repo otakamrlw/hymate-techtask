@@ -40,4 +40,7 @@ I tried to create another class for the configured system, which is a child clas
 
 ## Usage
 `python energy_manager.py`
-Then, you can choose a combination of the components as CLI inputs.
+Then, you can choose a combination of the components as CLI inputs like below.
+
+
+![energy manager](energy_manager.png)
