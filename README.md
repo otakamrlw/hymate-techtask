@@ -15,5 +15,23 @@ lamda_function.py is deployed on AWL Lambda, which is connected to S3 bucket to 
 I assume that we need weather forecast data every morning. Therefore, I configured EventBridge with crom so that the lamda_function.py is executed at 8 am every day and the result is stored in S3 bucket with today's date as the file name e.g. 2023-08-29.json.
 The resource is implemented in my AWS account and we can discuss more details when we meet.
 
-# Usage
+## Usage
 
+# 2. Energy Management System
+## Task
+The system must manage the energy flow of a generic household. Any generic household energy system has energy producers, consumers, storage solutions and access to the grid. The goal of every energy management system is to minimize the carbon emissions of electricity consumption and reduce costs by using clean energy.
+
+Develop a system that can configure any combination of components. The possibilities must include, at least two types of clean energy producers, at least the household as a consumer and a battery as storage. The system has to enable modularity and expandability, meaning if I were to add more battery capacity, or a new clean energy producer, It could easily be done. Create one configured system as an example. The system should have at least one clean producer, one consumer, battery storage and grid access. Use the provided dataset for the households consumption and solar panels production. Feel free to generate profiles for other green energy producers.
+
+Implement a method that will read through the dummy dataset given and decide how the electricity demand should be met. Create your own logic to decide when to use energy from the clean producers, the battery or the grid. Try to consider all scenarios, specified and non-specified, for example when to charge the battery. Log all the decisions made by your logic and save it also as a timeseries. The log should be the same length as the dummy dataset and register at each 5 minutes the energy flows between the components. Tip: One column for each component and how much energy is going in or out at each time step.
+
+## Solution
+To make an Energy Management System that consists of multiple components, I first made a class for CleanEnergyProducer, Consumer, and Storage. Then, I made instances based on each class e.g. solar_power instance for CleanEnergyProducer class. Next, I implemented choose_component function that lets a user choose a combination of the components by user inputs.
+
+Below here is not tested and may not work properly. I would like to discuss how we could do it better.
+
+I tried to create another class for the configured system, which is a child class of CleanEnergyProducer class, Consumer class and Storage class. However, I couldn't manage to inherit multiple classes properly, therefore, I made another independent class called ConfiguredSystem as an alternative. It has a method called decide_component to decide which component the system uses at the time based on the logic. It saves the decision of which component was used as a log in a column in a dummy dataset. 
+
+
+## Usage
+python energy_manager.py
