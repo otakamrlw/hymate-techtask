@@ -1,5 +1,8 @@
 # hymate-techtask
 
+## Create a conda env
+`conda env create --file environment.yaml`
+
 # 1. API call with AWS cloud
 ## Task
 The task below is to be performed in a serverless mindset. Everything can and has to be done using AWS Cloud resources. The resources itself don’t have to be implemented on AWS, but the code has to be written as if it was. The candidate must indicate what services are needed in each step and explain why the chosen service is the best choice. The code has to be usable in the pointed services without changes.
@@ -16,6 +19,8 @@ I assume that we need weather forecast data every morning. Therefore, I configur
 The resource is implemented in my AWS account and we can discuss more details when we meet.
 
 ## Usage
+lambda_function.py can be directly deployed on AWS lambda. Just change BUCKET_NAME to your bucket name. An example of the response of the API call is saved as 2023-08-29.json
+
 
 # 2. Energy Management System
 ## Task
@@ -30,8 +35,9 @@ To make an Energy Management System that consists of multiple components, I firs
 
 Below here is not tested and may not work properly. I would like to discuss how we could do it better.
 
-I tried to create another class for the configured system, which is a child class of CleanEnergyProducer class, Consumer class and Storage class. However, I couldn't manage to inherit multiple classes properly, therefore, I made another independent class called ConfiguredSystem as an alternative. It has a method called decide_component to decide which component the system uses at the time based on the logic. It saves the decision of which component was used as a log in a column in a dummy dataset. 
+I tried to create another class for the configured system, which is a child class of CleanEnergyProducer class, Consumer class and Storage class. However, I couldn't manage to inherit multiple classes properly, therefore, I made another independent class called ConfiguredSystem as an alternative. It has a method called decide_component to decide which component the system uses at the time based on the logic. It saves the decision of which component was used as a log in a column in a dummy dataset. The logic is rather simple as I don't have much knowledge of energy management yet. When the supply of clean energy is larger than demand, always use clean energy. Then, when there is still power left in storage, use storage. It always keeps a small amount in case of emergency. When neither clean energy nor storage is available, use legacy energy from the grid.
 
 
 ## Usage
-python energy_manager.py
+`python energy_manager.py`
+Then, you can choose a combination of the components as CLI inputs.
